@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+probe/
+PCMAnalyzer.app/
+PCMAnalyzer.app.bak-*/
+dump/
+
+# 验收素材由 tools/make_samples.py 确定性生成（含 44MB 大文件），不入库
+samples/
