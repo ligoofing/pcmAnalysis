@@ -14,6 +14,12 @@ if [[ ! -x "$ROOT/.venv/bin/python" ]]; then
   exit 1
 fi
 
+# 图标：缺失就先生成（icns 与 iconset 都是可复现产物，不入库）
+if [[ ! -f "$ROOT/assets/AppIcon.icns" ]]; then
+  echo "生成应用图标…"
+  QT_QPA_PLATFORM=offscreen "$ROOT/.venv/bin/python" tools/make_icon.py || exit 1
+fi
+
 # 旧产物不删除，改名保留（可随时恢复或自行清理）
 if [[ -e "$APP" ]]; then
   BACKUP="$APP.bak-$(date +%Y%m%d-%H%M%S)"
@@ -21,6 +27,7 @@ if [[ -e "$APP" ]]; then
   echo "已有产物改名保留为 $BACKUP"
 fi
 mkdir -p "$BIN" "$RES"
+cp "$ROOT/assets/AppIcon.icns" "$RES/AppIcon.icns"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -36,6 +43,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>LSMinimumSystemVersion</key><string>11.0</string>
   <key>NSHighResolutionCapable</key><true/>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
   <key>CFBundleDocumentTypes</key>
   <array>

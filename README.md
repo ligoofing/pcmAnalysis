@@ -9,7 +9,7 @@ WAV，多通道显示与播放，时域波形 + 谱图联动，时间/幅值独�
 cd pcmAnalysis
 ./run.sh                       # 首次会自动建 venv 并装依赖（走清华镜像）
 ./run.sh samples/mic8_48k_24bit.wav      # 直接带文件启动
-./make_app.sh && open PCMAnalyzer.app    # 生成可双击的 .app
+./make_app.sh && open PCMAnalyzer.app    # 生成可双击的 .app（首次会自动生成图标）
 ```
 
 依赖：`numpy`、`soundfile`、`sounddevice`、`PySide6`。Python ≥ 3.10（实测 3.12.14）。
@@ -115,7 +115,8 @@ app/ui/overview_bar    顶部全曲缩略图（分道包络 + 窗口框，后台
 app/ui/pcm_dialog      裸 PCM 参数弹窗（历史 + 预设 + 解析结果预览）
 app/ui/transport.py    传输控制条
 app/ui/main_window.py  装配与联动
-samples/               12 个验收素材（含 manifest.json 参数清单）
+samples/               12 个验收素材（含 manifest.json 参数清单，脚本生成不入库）
+assets/                图标产物（脚本生成不入库）
 ```
 
 ## 已知限制
@@ -127,6 +128,21 @@ samples/               12 个验收素材（含 manifest.json 参数清单）
   所以 WAV 路径不受影响）。
 - **谱图按当前时间窗重算**（90ms 防抖），极长窗口 + 极大 FFT 时会有短暂「计算中」。
 - 没有：频谱切片/传递函数、标记点、时间拉伸、导出图像文件（右键可复制当前视图到剪贴板）。
+
+## 应用图标
+
+`tools/make_icon.py` 用 QPainter 按归一化坐标绘制：深色圆角瓷砖 + 彩色频谱柱 +
+白色波形线 + 细红播放指针。**每个尺寸单独重绘**而不是画一张 1024 再缩放，否则 16/32px
+的线条会发灰糊成块；尺寸分级也不是等比缩小——16/32px 只留 3 根柱和 2 个周期波形并去掉
+播放指针，128px 以上才用 7 根柱和 3 个周期。
+
+```bash
+QT_QPA_PLATFORM=offscreen .venv/bin/python tools/make_icon.py            # 生成 assets/AppIcon.icns
+QT_QPA_PLATFORM=offscreen .venv/bin/python tools/make_icon.py --preview  # 出 16~512 并排对照图
+```
+
+`make_app.sh` 会把 icns 拷进 bundle 并写 `CFBundleIconFile`；用 `run.sh` 直接跑
+python 时由 `app.setWindowIcon()` 给 Dock/窗口设图标（找不到图标则静默降级）。
 
 ## 许可证
 
