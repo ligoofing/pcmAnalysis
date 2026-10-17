@@ -7,11 +7,9 @@ import sys
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication
 
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+    # Qt6 默认已启用高分屏缩放与高 DPI 位图，再显式 setAttribute 会打 DeprecationWarning
     app = QApplication(argv)
     app.setApplicationName("PCM Analyzer")
     app.setOrganizationName("QwenWork")
